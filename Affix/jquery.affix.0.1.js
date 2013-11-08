@@ -1,3 +1,5 @@
+//add start pause method
+
 ;(function($, exports, undefined) {
 
 //检测是否为ie6 ie7
@@ -222,14 +224,15 @@
                     $el.css(me.currentStyle);
                     me.heightHackDom && me.heightHackDom.show();
                     me.isWork = true;
-                }
-                if(me.heightHackDom) {
-                    if(me.heightHackFix) {
-                        me.heightHackDom.css('height', me.heightHackFix);
-                    } else {
-                        me.heightHackDom.css('height', $(me.el).outerHeight(true));
+                    if(me.heightHackDom) {
+                        if(me.heightHackFix) {
+                            me.heightHackDom.css('height', me.heightHackFix);
+                        } else {
+                            me.heightHackDom.css('height', $(me.el).outerHeight(true));
+                        }
                     }
                 }
+                
                 //ie6的定位需要随着滚动条的移动而更新
                 if (isIE6) {
                     $el.css(getPosition(me.currentStyle, $el));
@@ -238,10 +241,7 @@
             } else {
                 if(me.isWork) {
                     me.isWork = false;
-                    //heightHackDom需放在$el.css方法之后，否则在chrome中会因为滚动条的向上跳动导致抖动发生
-                    $el.css($.extend(me.lastStyle, getValue(me.recoveryStyle)));
-                    me.heightHackDom && me.heightHackDom.hide();
-                    $(me).trigger('resetPosition');
+                    me.resetPosition();
                 } else {
                     $(me).trigger('outOfWork');
                 }
@@ -272,19 +272,17 @@
         //由于在不支持requestAnimationFrame的浏览器中，由于渲染的不同步，导致页面产生抖动
         //将效果改为不连续的定位
         if(requestAFrame.noSupportAnimationFrame) {
-            renderFunc = function() {
+            me.renderFunc = function() {
                 if(me.endAnimation) {
                     cancelAFrame(me.endAnimation);
                     me.endAnimation = null;
                 }
 
-                me.endAnimation = requestAFrame(function() {
-                    me.setPosition();
-                });
+                me.endAnimation = requestAFrame(me.setPositionProxy);
 
             };
         } else {
-            renderFunc = function() {
+            me.renderFunc = function() {
                 if(!me.onAnimation) {
                     me.onAnimation = true;
                     me.animationId = requestAFrame(me.setPositionProxy);
@@ -292,11 +290,44 @@
             };
         }
 
-        $win.on('scroll.affix resize.affix', renderFunc);
+
+        $win.on('scroll.affix resize.affix', me.renderFunc);
 
         me.setPosition();
 
         return me;
+    };
+
+
+
+    Affix.prototype.resetPosition = function() {
+        var me = this,
+            $el = $(me.el);
+
+        //heightHackDom需放在$el.css方法之后，否则在chrome中会因为滚动条的向上跳动导致抖动发生
+        $el.css($.extend(me.lastStyle, getValue(me.recoveryStyle)));
+        me.heightHackDom && me.heightHackDom.hide();
+        $(me).trigger('positionReset');   
+    };
+
+    Affix.prototype.start = function() {
+        if(!this.run) {
+            $(window).on('scroll.affix resize.affix', this.renderFunc);
+            this.run = true;
+        }
+    };
+
+    Affix.prototype.pause = function() {
+        this.run = false;
+        if(this.isWorking()) {
+            this.isWork = false;
+            this.resetPosition();
+        }
+        $(window).off('scroll.affix resize.affix', this.renderFunc);
+    };
+
+    Affix.prototype.isWorking = function() {
+        return this.isWork;
     };
 
     $.fn.affix = function(opts) {

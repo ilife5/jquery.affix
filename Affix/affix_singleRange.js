@@ -31,8 +31,10 @@
             everyTime : true,
             heightHack : true,
             left : left,
-            range : range
-        }).render().setPosition();
+            range : range,
+            autoRender: false
+        });
+        affix.render();
 
         return affix;
     }
