@@ -50,8 +50,9 @@
 <div id="container">
     <div id="right">
         <div id="floatArea">
-            <button id="start"></button>
-            <button id="pause"></button>
+            <button id="start">start</button>
+            <button id="pause">pause</button>
+            <button id="destroy">destroy</button>
         </div>
     </div>
     <div id="left"></div>
@@ -70,12 +71,14 @@
         el : $floatArea
     });
 
-    console.log(single);
     $('#start').on('click', function() {
         single.start();
     });
     $('#pause').on('click', function() {
         single.pause();
+    });
+    $('#destroy').on('click', function() {
+        single.destroy();
     });
 </script>`
 </body>

@@ -295,10 +295,18 @@
 
         me.setPosition();
 
+        $(me.el).data('$objAfix', me);
+
         return me;
     };
 
-
+    Affix.prototype.destroy = function() {
+        $(this.el).data('$objAfix', null);
+        this.pause();
+        this.pause = this.start = this.destroy = function() {
+            return false;
+        };
+    };
 
     Affix.prototype.resetPosition = function() {
         var me = this,
