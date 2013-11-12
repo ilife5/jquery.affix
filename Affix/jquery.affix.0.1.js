@@ -338,6 +338,18 @@
         return this.isWork;
     };
 
+    Affix.prototype.refreshAll = function() {
+        $(window).trigger('scroll.Affix');
+    };
+
+    Affix.prototype.getOriDomOffset = function() {
+        if(this.isWorking()) {
+            return $(this.heightHackDom).offset();
+        } else {
+            return $(this.el).offset();
+        }
+    };
+
     $.fn.affix = function(opts) {
         $(this).each(function() {
             var el = this;
