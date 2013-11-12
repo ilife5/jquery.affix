@@ -339,7 +339,7 @@
     };
 
     Affix.prototype.refreshAll = function() {
-        $(window).trigger('scroll.Affix');
+        $(window).trigger('scroll.affix');
     };
 
     Affix.prototype.getOriDomOffset = function() {
