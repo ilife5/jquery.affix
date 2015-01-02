@@ -16,7 +16,6 @@
     "jquery": "1.9.1"
   },
   "license": "MIT",
-  "private": true,
   "ignore": [
     "**/.*",
     ".idea",
