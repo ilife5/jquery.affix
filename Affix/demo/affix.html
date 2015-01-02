@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>纵向范围滚动吸顶效果</title>
+    <title>默认吸顶效果</title>
     <meta charset="utf-8">
     <style type="text/css">
         html, body, div {margin: 0; padding: 0; border: none;}
 
         body {
             width : 980px;
-            position: relative;
         }
 
         #title {
@@ -50,25 +49,16 @@
 <div id="title"></div>
 <div id="container">
     <div id="right">
-        <div id="floatArea"></div>
+        <div id="floatArea" data-affix></div>
     </div>
     <div id="left"></div>
 </div>
 <script type="text/javascript" src="../jquery.1.9.1.min.js"></script>
 <script type="text/javascript" src="../jquery.affix.0.1.js"></script>
-<script type="text/javascript" src="../affix_hBox.js"></script>
 <script type="text/javascript">
     var $floatArea = $('#floatArea'),
             $right = $('#right'),
             $left = $('#left');
-    var affix = affix_hBox({
-        floatArea : $floatArea,
-        top : 0,
-        left : $right,
-        rangeTop : $right,
-        rangeBottom : $left,
-        ie7FixedHack: true
-    }).render();
 </script>
 </body>
 </html>

@@ -139,6 +139,11 @@
         return ret;
     }
 
+    var classNames = {
+        inRange: "affix-active",
+        outOfRange: "affix-default"
+    };
+
     function Affix(options) {
         var me = this;
         //遍历参数，如果存在于defaultConfig中，将该参数作为实例的属性
@@ -149,9 +154,25 @@
                 }
             });
         }
+
+        if(!me.range) {
+            me.range = $(me.el).position().top;
+        }
+
+        if(me.left === null) {
+            me.left = function() {
+                return $(me.el).parent().position().left - $(document).scrollLeft();
+            }
+        } else if($(me.left).get(0).nodeType) {
+            me.left = function() {
+                return $(me.left).position().left - $(document).scrollLeft();
+            }
+        }
+
         me.isWork = false;
         me.currentStyle = {};
         me.lastStyle = {};
+        $(me.el).data('$objAfix', me);
 
         if(me.autoRender) {
             me.render();
@@ -165,24 +186,29 @@
 
     $.extend(Affix.prototype, {
         el:null, //目标节点
-        everyTime:false, //是否每次动态计算位置
+        everyTime:true, //是否每次动态计算位置
         autoRender:true,    //是否创建时立即执行
         heightHack:false, //是否模拟高度，避免在setposition的临界状态时的抖动
         heightHackFix:null,
         range:null, //生效范围
-        top:null, //生效时的top值
+        top:0, //生效时的top值
         left:null, //生效时的left值
         bottom:null, //生效时的bottom值
         right:null, //生效时的right值
         additionStyle:null, //生效时的附加样式
         recoveryStyle:null,
+        ie7FixedHack:false, //是否针对ie7 fixed定位的不完整实现（父级元素position取值为relative，缩放的场景下定位不准确）做hack
         currentStyle:{},
         lastStyle:{},
         isWork:false,
+        container: null,
+        classNames: classNames, //样式hack
         setPosition:function () {
             var me = this,
                 range = me.range,
-                $el = $(me.el);
+                $el = $(me.el),
+                isPositionAbs = isIE6 || me.ie7FixedHack,       //是否在吸顶时对元素进行绝对定位
+                isFactorNeeded = isIE7 && !me.ie7FixedHack;     //是否需要在IE7且fixed定位时对元素的坐标进行修正
             /**
              * 区分range的值
              * 当range为单值时，比较top >= range，如果range是个函数，则比较top >= range.call(this)
@@ -204,20 +230,20 @@
                             me.lastStyle[k] = $el.css(k);
                         });
                     }
-                    if (isIE6) {
+                    if (isPositionAbs) {
                         me.currentStyle.position = 'absolute';
                     }
 
                     $.each(['top', 'bottom', 'left', 'right'], function(i, name) {
                         //在循环中加入IE7位置修复的hack
-                        if(isIE7) {
+                        if(isFactorNeeded) {
                             var _factor = GetZoomFactor() || 0.1;
                         }
 
                         if(me.currentStyle[name] === null) {
                             delete me.currentStyle[name];
                             delete me.lastStyle[name];
-                        } else if(isIE7) {
+                        } else if(isFactorNeeded) {
                             me.currentStyle[name] = me.currentStyle[name] / _factor;
                         }
                     });
@@ -232,9 +258,13 @@
                         }
                     }
                 }
-                
-                //ie6的定位需要随着滚动条的移动而更新
-                if (isIE6) {
+
+                if(!$el.hasClass(me.classNames.inRange)) {
+                    $el.removeClass(me.classNames.outOfRange).addClass(me.classNames.inRange);
+                }
+
+                //绝对定位需要随着滚动条的移动而更新
+                if (isPositionAbs) {
                     $el.css(getPosition(me.currentStyle, $el));
                 }
                 $(me).trigger('changePosition');
@@ -244,6 +274,10 @@
                     me.resetPosition();
                 } else {
                     $(me).trigger('outOfWork');
+                }
+
+                if(!$el.hasClass(me.classNames.outOfRange)) {
+                    $el.removeClass(me.classNames.inRange).addClass(me.classNames.outOfRange);
                 }
             }
             $(me).trigger('position');
@@ -255,6 +289,10 @@
         var me = this,
             $win = $(window),
             renderFunc;
+
+        if(me.container != null) {
+            $(me.el).appendTo(me.container);
+        }
 
         me.onAnimation = false;
         me.animationId = null;
@@ -290,13 +328,8 @@
             };
         }
 
-
         $win.on('scroll.affix resize.affix', me.renderFunc);
-
         me.setPosition();
-
-        $(me.el).data('$objAfix', me);
-
         return me;
     };
 
@@ -353,12 +386,16 @@
     $.fn.affix = function(opts) {
         $(this).each(function() {
             var el = this;
-            $(el).data('$objAfix', new Affix($.extend({
-                el : el
-            }, opts
-            )));
+            new Affix($.extend({
+                    el : el
+                }, opts
+            ))
         });
     };
+
+    $(function() {
+        $("[data-affix]").affix();
+    });
 
     exports.Affix = Affix;
 

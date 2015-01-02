@@ -1,0 +1,28 @@
+{
+  "name": "jquery.affix",
+  "version": "0.1.0",
+  "homepage": "https://github.com/ilife5/jquery.affix",
+  "authors": [
+    "ilife5 <ilife5@qq.com>"
+  ],
+  "description": "Affix an element to the configurable position of the window when scrolling in a range, based on jquery. (在一个范围内的吸顶效果，吸上吸下各种吸)",
+  "main": "Affix/jquery.affix.0.1.js",
+  "keywords": [
+    "jquery.plugin",
+    "affix",
+    "position"
+  ],
+  "dependencies": {
+    "jquery": "1.9.1"
+  },
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    ".idea",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

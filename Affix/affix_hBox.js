@@ -113,7 +113,8 @@
                         return oriTop;
                     }
                 }
-            }
+            },
+            ie7FixedHack: opts.ie7FixedHack
         });
 
         affix.resetFloatPosition = resetFloatPosition;
