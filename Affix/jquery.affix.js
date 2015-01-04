@@ -6,6 +6,7 @@
     var isIE6 = /MSIE 6\.0/.test(navigator.userAgent),
         isIE7 = /MSIE 7\.0/.test(navigator.userAgent);
 
+    var AffixConfig = {};
 
     /**
      * 返回v>=b
@@ -386,9 +387,10 @@
     $.fn.affix = function(opts) {
         $(this).each(function() {
             var el = this;
-            new Affix($.extend({
+            var config = AffixConfig[$(el).data("affix")];
+            new Affix($.extend(true, {
                     el : el
-                }, opts
+                }, opts, config
             ))
         });
     };
@@ -398,5 +400,6 @@
     });
 
     exports.Affix = Affix;
+    exports.AffixConfig = AffixConfig;
 
 })(jQuery, window);
